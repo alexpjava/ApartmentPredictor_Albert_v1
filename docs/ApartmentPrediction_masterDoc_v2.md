@@ -26,9 +26,9 @@ Historical notes:
 
 - API REST test tools:
   
-  - https://www.postman.com/ / https://learning.postman.com/docs/sending-requests/requests/
+  - [postman](https://www.postman.com/) / [Postman docs](https://learning.postman.com/docs/sending-requests/requests/)
   
-  - https://swagger.io/ / https://springdoc.org/
+  - [Swagger](https://swagger.io/ / https://springdoc.org/)
 
 - [restaurantManager controller](https://github.com/AlbertProfe/restaurantManager/blob/master/src/main/java/dev/example/restaurantManager/controller/BookingController.java)
 
@@ -342,6 +342,16 @@ Calls that will work
   ```text
   GET http://localhost:8080/api/apartment/getById?id=19a1b4c3-cfc8-4db2-885c-546db0511463
   ```
+
+### Request/response Cycle
+
+- [Spring Boot: cycle – albertprofe wiki](https://albertprofe.dev/springboot/boot-what-cycle.html)
+
+![](https://raw.githubusercontent.com/AlbertProfe/ApartmentPredictor/refs/heads/master/docs/screenshots/code-restcontroller.png)
+
+### Postman documentation API REST
+
+- [apartmentPredictorCRUD](https://documenter.getpostman.com/view/7473960/2sBXVeFs8L)
 
 ## JPA
 
