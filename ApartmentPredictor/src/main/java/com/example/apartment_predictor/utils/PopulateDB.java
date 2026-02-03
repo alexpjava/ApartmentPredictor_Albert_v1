@@ -57,7 +57,12 @@ public class PopulateDB {
             apartmentService.createApartment(apartment);
 
             Apartment apartmentById = apartmentService.findApartmentById(apartment.getId());
-            if (apartmentById != null) qtyApartmetnsCreated++;
+            if (apartmentById != null) {
+                qtyApartmetnsCreated++;
+                System.out.println(
+                        "Apartment #" + qtyApartmetnsCreated +
+                         "/" + qty + " created populateDB: " + apartmentById);
+            }
 
         }
         return qtyApartmetnsCreated;
