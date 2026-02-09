@@ -1,4 +1,6 @@
-# JPA Relationships Guide: Understanding @OneToMany and @ManyToOne
+# JPA Relationships Guide
+
+# @OneToMany and @ManyToOne
 
 ## Introduction
 
@@ -295,5 +297,161 @@ In our Apartment Predictor application, this means we can easily:
 - Calculate average ratings per apartment
 - Delete apartments and their reviews safely
 - Navigate from reviews back to apartment details
+
+> Without these relationships, we'd be stuck with manual SQL queries, data integrity issues, and much more complex code!
+
+## Many-to-Many Relationships (@ManyToMany)
+
+Many-to-many relationships occur when **many instances of one entity can be associated with many instances of another entity** (and vice versa).
+
+### Real-World Example: Schools and Apartments
+
+- A **School** can be linked to many **Apartments** (e.g., student housing options near campus)
+- An **Apartment** can be affiliated with many **Schools** (e.g., popular among students from different universities)
+
+This is a classic **many-to-many** relationship.
+
+### Database Structure (Join Table)
+
+JPA creates a **join table** to store the associations:
+
+```sql
+CREATE TABLE APARTMENT_SCHOOL_JOIN_TABLE (
+    apartment_id VARCHAR(255) NOT NULL,
+    school_id    VARCHAR(255) NOT NULL,
+    PRIMARY KEY (apartment_id, school_id),
+    FOREIGN KEY (apartment_id) REFERENCES apartment(id),
+    FOREIGN KEY (school_id)    REFERENCES school(id)
+);
+```
+
+No foreign keys are added directly to the `apartment` or `school` tables.
+
+### Unidirectional @ManyToMany (Owning Side = Apartment)
+
+Only **one side** knows about the relationship.
+
+```java
+@Entity
+public class Apartment {
+    @Id
+    protected String id;
+
+    // ... other fields ...
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "APARTMENT_SCHOOL_JOIN_TABLE",
+        joinColumns = @JoinColumn(name = "apartment_id"),
+        inverseJoinColumns = @JoinColumn(name = "school_id")
+    )
+    private List<School> schools = new ArrayList<>();
+
+    // getters, setters, constructor...
+}
+```
+
+```java
+@Entity
+public class School {
+    @Id
+    private String id;
+
+    // ... other fields ...
+
+    // No reference to Apartments → unidirectional
+}
+```
+
+**Key characteristics**:
+
+- You can fetch all schools from an apartment (`apartment.getSchools()`)
+- You **cannot** easily fetch all apartments from a school without writing custom queries
+- The **owning side** is Apartment (it defines the `@JoinTable`)
+
+### Bidirectional @ManyToMany
+
+Both sides know about the relationship → full navigation in both directions.
+
+```java
+@Entity
+public class Apartment {
+    @Id
+    protected String id;
+
+    // ... other fields ...
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "APARTMENT_SCHOOL_JOIN_TABLE",
+        joinColumns = @JoinColumn(name = "apartment_id"),
+        inverseJoinColumns = @JoinColumn(name = "school_id")
+    )
+    private List<School> schools = new ArrayList<>();
+
+    // ... getters, setters ...
+}
+```
+
+```java
+@Entity
+public class School {
+    @Id
+    private String id;
+
+    // ... other fields ...
+
+    @ManyToMany(mappedBy = "schools")  // ← inverse side
+    private List<Apartment> apartments = new ArrayList<>();
+
+    // ... getters, setters ...
+}
+```
+
+**Best practice**: Add helper methods to keep both sides in sync:
+
+```java
+public class Apartment {
+    public void addSchool(School school) {
+        schools.add(school);
+        school.getApartments().add(this);
+    }
+
+    public void removeSchool(School school) {
+        schools.remove(school);
+        school.getApartments().remove(this);
+    }
+}
+```
+
+### Unidirectional vs Bidirectional @ManyToMany – Quick Comparison
+
+| Aspect                | Unidirectional                      | Bidirectional                               |
+| --------------------- | ----------------------------------- | ------------------------------------------- |
+| Navigation            | One direction only                  | Both directions                             |
+| Code complexity       | Simpler (less fields & sync logic)  | More code (must sync both sides)            |
+| Use case              | When you rarely/never need inverse  | When you need to query both ways frequently |
+| Performance           | Slightly better (less object graph) | Can be heavier with large collections       |
+| Join table definition | Only on owning side                 | Owning side defines `@JoinTable`            |
+
+**Recommendation**: Start with **unidirectional** unless you clearly need navigation in both directions.
+
+## Summary
+
+JPA relationships like `@OneToMany`, `@ManyToOne`, and `@ManyToMany` are essential because they:
+
+1. **Model Real-World Relationships**: Apartments naturally have multiple reviews; Schools ↔ Apartments are many-to-many
+2. **Ensure Data Integrity**: Foreign key constraints prevent orphaned data
+3. **Simplify Code**: Navigate between objects naturally (`apartment.getReviews()`, `school.getApartments()`)
+4. **Optimize Performance**: JPA generates efficient SQL queries automatically
+5. **Maintain Consistency**: Cascade operations keep related data synchronized
+
+In our Apartment Predictor application, this means we can easily:
+
+- Find all reviews for a specific apartment
+- Calculate average ratings per apartment
+- Delete apartments and their reviews safely
+- Navigate from reviews back to apartment details
+- (with @ManyToMany) Associate apartments with multiple schools and query in one or both directions
 
 > Without these relationships, we'd be stuck with manual SQL queries, data integrity issues, and much more complex code!
