@@ -72,7 +72,7 @@ public class ApartmentRestController {
     public ResponseEntity<String> populateApartments(@RequestParam int qty) {
         // CALL to PopulateDB.populateApartments() method
         // to populate the database with random apartments
-        int qtyApartmentsCreated = populateDB.populateApartments(qty);
+        int qtyApartmentsCreated = populateDB.populatePlainApartments(qty).size();
         if (qtyApartmentsCreated > 0)
             return ResponseEntity.ok("Populated apartments: " + qtyApartmentsCreated);
         else

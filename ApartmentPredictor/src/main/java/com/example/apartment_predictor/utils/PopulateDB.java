@@ -7,6 +7,7 @@ import com.example.apartment_predictor.service.ApartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,8 +28,11 @@ public class PopulateDB {
     public int populateAll(int qty) {
 
         // 1 populate Apartments > List
+        List<Apartment> apartments = populatePlainApartments(qty);
         // 2 populate Schools > List
+        List<School> schools = populateSchools(qty);
         // 3 assignSchoolsToApartments
+        boolean status = assignSchoolsToApartments(apartments, schools);
         // 4 populate Reviewers > List
         // 5 populate Reviews (very general description, valid for all apartments) and assign Reviewers
         // 6 assign Reviews to Apartments
@@ -40,11 +44,12 @@ public class PopulateDB {
         return 0;
     }
 
-    // populate apartments and schools
+    // --------- POPULATE apartments and schools ------------------------------
 
-    public int populateSchools(int qty) {
+    public List<School> populateSchools(int qty) {
         int qtySchoolsCreated = 0;
-        if (qty <= 0) return 0;
+        List<School> schools = new ArrayList<>();
+        if (qty <= 0) return null;
 
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
@@ -67,18 +72,20 @@ public class PopulateDB {
             School schoolById = schoolRepository.findById(school.getId()).orElse(null);
             if (schoolById != null) {
                 qtySchoolsCreated++;
+                schools.add(schoolById);
                 System.out.println(
                         "School #" + qtySchoolsCreated +
                                 "/" + qty + " created populateDB: " + schoolById);
             }
         }
 
-        return qtySchoolsCreated;
+        return schools;
     }
 
-    public int populateApartments(int qty) {
+    public List<Apartment> populatePlainApartments(int qty) {
         int qtyApartmetnsCreated = 0;
-        if (qty <= 0) return 0;
+        List<Apartment> apartments = new ArrayList<>();
+        if (qty <= 0) return null;
 
         //Faker faker = new Faker(new Locale("en-US"));
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
@@ -123,18 +130,52 @@ public class PopulateDB {
             Apartment apartmentById = apartmentService.findApartmentById(apartment.getId());
             if (apartmentById != null) {
                 qtyApartmetnsCreated++;
+                apartments.add(apartmentById);
                 System.out.println(
                         "Apartment #" + qtyApartmetnsCreated +
                          "/" + qty + " created populateDB: " + apartmentById);
             }
 
         }
-        return qtyApartmetnsCreated;
+        return apartments;
     }
 
-   public int assignSchoolsToApartments(List<Apartment> apartments, List<School> schools) {
-       return 0;
-   }
+    public boolean assignSchoolsToApartments(List<Apartment> apartments, List<School> schools) {
+        if (apartments == null || apartments.isEmpty() || schools == null || schools.isEmpty()) {
+            return false;
+        }
+
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+
+        for (Apartment apartment : apartments) {
+            // Randomly assign 1 to 4 schools
+            int numSchoolsToAssign = rnd.nextInt(1, 5); // 1, 2, 3, or 4
+
+            // Don't assign more schools than available
+            numSchoolsToAssign = Math.min(numSchoolsToAssign, schools.size());
+
+            // Randomly select schools
+            List<School> selectedSchools = new ArrayList<>();
+            List<School> availableSchools = new ArrayList<>(schools);
+
+            for (int i = 0; i < numSchoolsToAssign && !availableSchools.isEmpty(); i++) {
+                int randomIndex = rnd.nextInt(availableSchools.size());
+                School selectedSchool = availableSchools.remove(randomIndex);
+                selectedSchools.add(selectedSchool);
+            }
+
+            // Assign schools to apartment
+            if (!selectedSchools.isEmpty()) {
+                apartment.addSchools(selectedSchools);
+                apartmentService.updateApartment(apartment);
+
+                System.out.println("Assigned " + selectedSchools.size() + " schools to apartment " + apartment.getId());
+            }
+        }
+
+        return true;
+    }
+
 
 
 
