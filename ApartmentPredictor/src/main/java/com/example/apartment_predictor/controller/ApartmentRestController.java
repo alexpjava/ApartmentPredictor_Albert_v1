@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "*", allowedHeaders = "*")
+//@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 @RequestMapping("api/apartment")
 public class ApartmentRestController {
@@ -43,11 +46,12 @@ public class ApartmentRestController {
         //apartment.setId(UUID.randomUUID().toString());
         return apartmentService.createApartment(apartment);
     }
-
+    /*
     @PostMapping("/update")
     public Apartment updateApartment(@RequestBody Apartment apartment){
         return apartmentService.updateApartment(apartment);
     }
+    */
 
     @DeleteMapping("/deleteById")
     public void deleteApartmentById(@RequestParam String id){
