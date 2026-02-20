@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/reviewers")
+@RequestMapping("api/v1/reviewer")
 public class ReviewerRestController {
 
     @Autowired

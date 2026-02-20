@@ -98,6 +98,14 @@ public class Review {
         this.apartment = apartment;
     }
 
+    public Reviewer getReviewer() {
+        return reviewer;
+    }
+
+    public void setReviewer(Reviewer reviewer) {
+        this.reviewer = reviewer;
+    }
+
     @Override
     public String toString() {
         return "Review{" +
