@@ -56,6 +56,16 @@ origin    https://github.com/alexpjava/ApartmentPredictor_Albert_v1 (fetch/push)
 upstream  https://github.com/AlbertProfe/ApartmentPredictor (fetch/push)
 ```
 
+### 4.1 🔎 ¿Por qué aparecen fetch y push para ambos?
+
+1. Porque Git permite:
+Traer cambios (fetch) desde cualquier remoto
+Subir cambios (push) a cualquier remoto
+Aunque normalmente:
+Solo haces push a origin **"git push origin feature/H2inMemory"**
+Solo haces fetch desde upstream **"git fetch upstream"**
+Git igualmente muestra ambas URLs.
+
 ---
 
 ## 🌿 Crear una Rama de Trabajo (por ejercicio)
