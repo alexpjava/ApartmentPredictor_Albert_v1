@@ -38,7 +38,8 @@ public class PopulateDB {
         // 2 populate Schools > List
         List<School> schools = populateSchools(qty);
         // 3 assignSchoolsToApartments
-        List<Apartment> plainApartmentsWithSchools = assignSchoolsToApartments(plainApartments, schools);
+        List<Apartment> plainApartmentsWithSchools =
+                assignSchoolsToApartments(plainApartments, schools);
 
 
         // 4 populate Reviewers > List
@@ -49,14 +50,18 @@ public class PopulateDB {
         // 6 assign Reviewers to Reviews
         List<Review> reviews = assignReviewersToReviews(reviewers, plainReviews);
         // 7 assign Reviews to Apartments
-        List<Apartment> plainApartmentsWithSchoolsAndReviews = assignReviewsToApartments(reviews, plainApartmentsWithSchools);
+        List<Apartment> plainApartmentsWithSchoolsAndReviews =
+                assignReviewsToApartments(reviews, plainApartmentsWithSchools);
 
 
         // 8 populate Owners
         List<Owner> owners = populateOwners(qty);
-        // 9 populate PropertyContracts assign Owners and Apartments
-        List<PropertyContract> propertyContracts = populatePropertyContracts(qty);
-        // 10 check and return qty of created objects
+        // 9 populate PlainPropertyContracts
+        List<PropertyContract> plainPropertyContracts = populatePlainPropertyContracts(qty);
+        // 10 populate PropertyContracts assign Owners and Apartments
+        List<PropertyContract> plainPropertyContractsAssigned =
+                assignPropertyContracts(qty, plainPropertyContracts, owners);
+        // 11 check and return qty of created objects
 
 
         return 0;
@@ -382,7 +387,12 @@ public class PopulateDB {
         return null;
     }
 
-    public List<PropertyContract> populatePropertyContracts(int qty) {
+    public List<PropertyContract> populatePlainPropertyContracts(int qty) {
+        return null;
+    }
+
+    public List<PropertyContract> assignPropertyContracts(
+            int qty, List<PropertyContract> plainPropertyContracts, List<Owner> owners) {
         return null;
     }
 }

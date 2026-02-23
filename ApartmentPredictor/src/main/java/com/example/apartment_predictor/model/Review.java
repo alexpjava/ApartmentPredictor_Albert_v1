@@ -21,7 +21,7 @@ public class Review {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Apartment apartment;
 
-    @JsonIgnore
+    //@JsonIgnore
     @JoinColumn(name = "reviewer_fk")
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Reviewer reviewer;

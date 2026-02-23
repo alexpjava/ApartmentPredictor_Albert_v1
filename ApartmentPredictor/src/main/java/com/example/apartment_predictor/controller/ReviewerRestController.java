@@ -2,6 +2,7 @@ package com.example.apartment_predictor.controller;
 
 import com.example.apartment_predictor.model.Reviewer;
 import com.example.apartment_predictor.model.School;
+import com.example.apartment_predictor.repository.ReviewerRepository;
 import com.example.apartment_predictor.utils.PopulateDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,19 @@ public class ReviewerRestController {
 
     @Autowired
     PopulateDB populateDB;
+
+    @Autowired
+    ReviewerRepository reviewerRepository;
+
+   @GetMapping("/getAll")
+   public ResponseEntity<Iterable<Reviewer>> getAllReviewers() {
+       return ResponseEntity.ok(reviewerRepository.findAll());
+   }
+
+   @GetMapping("/getById")
+   public ResponseEntity<Reviewer> getReviewerById(@RequestParam String id) {
+       return ResponseEntity.ok(reviewerRepository.findById(id).orElse(null));
+   }
 
     @GetMapping("/populate")
     public ResponseEntity<String> populateReviewers(@RequestParam int qty) {
