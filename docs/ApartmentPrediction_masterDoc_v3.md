@@ -346,6 +346,7 @@ Each row means: “this apartment is connected to this school”.
 File: [src/main/java/com/example/apartment_predictor/controller/ApartmentRestController.java](cci:7://file:///home/albert/MyProjects/Sandbox/ApartmentPredictorProject/ApartmentPredictor/src/main/java/com/example/apartment_predictor/controller/ApartmentRestController.java:0:0-0:0)
 
 - Endpoint: `PUT /api/apartment/assignSchoolsToApartment`
+- New Endpoint v1: `PUT /api/v1/assign/apartment/schools`
 - Flow:
   - Load the [Apartment](cci:2://file:///home/albert/MyProjects/Sandbox/ApartmentPredictorProject/ApartmentPredictor/src/main/java/com/example/apartment_predictor/model/Apartment.java:7:0-12:23) by `apartmentId`
   - Load all `School`s by `schoolIds`
@@ -501,6 +502,10 @@ This is a classic **many-to-one / one-to-many bidirectional** pattern from the *
      → Can cause **severe performance problems** (N+1 → huge joins or many selects)  
    - **Strong recommendation**: change almost all to `FetchType.LAZY` and use `@EntityGraph`, `JOIN FETCH` or Spring Data projections when you really need the data.
 
+#### API REST
+
+- https://github.com/AlbertProfe/ApartmentPredictor/blob/master/docs/appends/REST-assignReviewToApartment.md
+
 ### Many-to-Many Apartment and Owner: bridge entity
 
 In real estate / property management systems, the relationship between **owners** and **apartments** is usually **many-to-many** with additional contract data:
@@ -609,17 +614,15 @@ Summary table
 The current implementation structures data population in a clear, <mark>sequential pipeline</mark>:
 
 1. Create base entities without relationships  
-   → `populatePlainApartments(qty)`  
-   → `populateSchools(qty)`
-   → `populateOwners(qty)`
+   → `populatePlainApartments(qty)` / `populateReviewers(qty)`  
+   → `populateSchools(qty)` / → `populateOwners(qty)`
 
 2. Create relationships / assign child entities  
    → `assignSchoolsToApartments(...)`
 
 3. Create next layer of entities  
-   → `populateReviewers(qty)`  
-   → `createPlainReviews(qty)` (reviews without owners yet)
-   → `populatePropertyContracts(qty)` (with owners and apartments)
+   → `populatePropertyContracts(qty)` (with owners and apartments)  
+   → `createPlainReviews(qty)` (reviews without owners yet) / → `populatePropertyContracts(qty)` (with owners and apartments)
 
 4. Wire relationships in multiple steps  
    → `assignReviewersToReviews(...)`  
@@ -660,9 +663,12 @@ Orchestrator skeleton:
 
         // 8 populate Owners
         List<Owner> owners = populateOwners(qty);
-        // 9 populate PropertyContracts assign Owners and Apartments
-        List<PropertyContract> propertyContracts = populatePropertyContracts(qty);
-        // 10 check and return qty of created objects
+        // 9 populate PlainPropertyContracts
+        List<PropertyContract> plainPropertyContracts = populatePlainPropertyContracts(qty);
+        // 10 populate PropertyContracts assign Owners and Apartments
+        List<PropertyContract> plainPropertyContractsAssigned =
+                assignPropertyContracts(qty, plainPropertyContracts, owners);
+        // 11 check and return qty of created objects
         // todo
 
         return 0;
@@ -873,4 +879,4 @@ Create `@RestController` endpoint `/api/fake-data` returning `List<Conference>`.
       Default locale: en_US, platform encoding: UTF-8
       OS name: "linux", version: "6.8.0-83-generic", arch: "amd64", family: "unix"
 
-- <mark>Spring Data JPA 4.0.0</mark>
+- <mark>Spring Data JPA 4.0.0</mark>Endpoint: `PUT /api/apartment/assignSchoolsToApartment`→ `populatePropertyContracts(qty)` (with owners and apartments)
