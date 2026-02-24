@@ -226,6 +226,14 @@ public class Apartment {
        this.schools.addAll(schools);
     }
 
+    public List<PropertyContract> getContracts() {
+        return contracts;
+    }
+
+    public void setContracts(List<PropertyContract> contracts) {
+        this.contracts = contracts;
+    }
+
     @Override
     public String toString() {
         return "Apartment{" +

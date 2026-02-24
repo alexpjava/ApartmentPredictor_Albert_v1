@@ -1,5 +1,6 @@
 package com.example.apartment_predictor.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class PropertyContract {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "OWNER_FK")
     private Owner owner;
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "APARTMENT_FK")
     private Apartment apartment;

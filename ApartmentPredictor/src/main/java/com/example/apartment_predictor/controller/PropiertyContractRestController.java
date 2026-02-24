@@ -26,12 +26,6 @@ public class PropiertyContractRestController {
         return ResponseEntity.ok().body(propertyContractRepository.findAll());
     }
 
-    public ResponseEntity<String> populatePropertyContracts(int qty){
-        List<PropertyContract> contracts = populateDB.populatePlainPropertyContracts(qty);
-        if (contracts.size() > 0)
-            return ResponseEntity.ok("Populated contracts: " + contracts.size());
-        else
-            return ResponseEntity.badRequest().body("Failed to populate contracts");
-    }
+
 
 }
