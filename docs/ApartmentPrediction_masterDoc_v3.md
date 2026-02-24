@@ -183,7 +183,7 @@ public class Reviewer {
 
 ### UML
 
-todo
+![](https://raw.githubusercontent.com/AlbertProfe/ApartmentPredictor/refs/heads/master/docs/diagrams/UML_v3.png)
 
 ## Code
 
