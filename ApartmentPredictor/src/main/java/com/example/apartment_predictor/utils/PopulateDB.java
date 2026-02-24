@@ -3,6 +3,8 @@ package com.example.apartment_predictor.utils;
 import com.example.apartment_predictor.model.*;
 import com.example.apartment_predictor.repository.ReviewRepository;
 import com.example.apartment_predictor.repository.ReviewerRepository;
+import com.example.apartment_predictor.repository.OwnerRepository;
+import com.example.apartment_predictor.repository.PropertyContractRepository;
 import com.example.apartment_predictor.repository.SchoolRepository;
 import com.example.apartment_predictor.service.ApartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ public class PopulateDB {
     ReviewerRepository reviewerRepository;
     @Autowired
     ReviewRepository reviewRepository;
+    @Autowired
+    OwnerRepository ownerRepository;
+    @Autowired
+    PropertyContractRepository propertyContractRepository;
 
 
     //todo: REFACTOR > all methods MUST return the objects created
@@ -41,7 +47,6 @@ public class PopulateDB {
         List<Apartment> plainApartmentsWithSchools =
                 assignSchoolsToApartments(plainApartments, schools);
 
-
         // 4 populate Reviewers > List
         List<Reviewer> reviewers = populateReviewers(qty);
         // 5 create Reviews (very general description, valid for all apartments) and assign Reviewers
@@ -53,15 +58,14 @@ public class PopulateDB {
         List<Apartment> plainApartmentsWithSchoolsAndReviews =
                 assignReviewsToApartments(reviews, plainApartmentsWithSchools);
 
-
         // 8 populate Owners
         List<Owner> owners = populateOwners(qty);
         // 9 populate PlainPropertyContracts
-        List<PropertyContract> plainPropertyContracts = populatePlainPropertyContracts(qty);
-        // 10 populate PropertyContracts assign Owners and Apartments
+        //List<PropertyContract> plainPropertyContracts = populatePlainPropertyContracts(qty);
+        // 9 populate PropertyContracts assign Owners and Apartments
         List<PropertyContract> plainPropertyContractsAssigned =
-                assignPropertyContracts(qty, plainPropertyContracts, owners);
-        // 11 check and return qty of created objects
+                createAndAssignPropertyContracts(qty, owners, plainApartmentsWithSchoolsAndReviews);
+        // 10 check and return qty of created objects
 
 
         return 0;
@@ -384,15 +388,122 @@ public class PopulateDB {
     // ---------- POPULATE owners, property contracts ------------------------------
 
     public List<Owner> populateOwners(int qty) {
-        return null;
+        int qtyOwnersCreated = 0;
+        List<Owner> owners = new ArrayList<>();
+        if (qty <= 0) return null;
+
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+
+        String[] firstNames = {"John", "Jane", "Michael", "Sarah", "David", "Emily", "Robert", "Lisa", "James", "Mary"};
+        String[] lastNames = {"Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"};
+        String[] domains = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "example.com"};
+        String[] idPrefixes = {"OWN", "PROP", "RLT", "INV", "MGT"};
+
+        for (int i = 0; i < qty; i++) {
+            String firstName = firstNames[rnd.nextInt(firstNames.length)];
+            String lastName = lastNames[rnd.nextInt(lastNames.length)];
+            String fullName = firstName + " " + lastName;
+            String email = firstName.toLowerCase() + "." + lastName.toLowerCase() + "@" + domains[rnd.nextInt(domains.length)];
+            String password = "password123";
+            boolean isActive = rnd.nextBoolean();
+            boolean isBusiness = rnd.nextBoolean();
+            String idLegalOwner = idPrefixes[rnd.nextInt(idPrefixes.length)] + "-" + String.format("%06d", rnd.nextInt(1000000));
+            LocalDate registrationDate = LocalDate.now().minusDays(rnd.nextInt(0, 3650)); // 0 to 10 years ago
+            int qtyDaysAsOwner = (int) (LocalDate.now().toEpochDay() - registrationDate.toEpochDay());
+            LocalDate birthDate = LocalDate.now().minusYears(rnd.nextInt(25, 71)); // 25 to 70 years old
+
+            Owner owner = new Owner(fullName, email, password, birthDate, isActive, isBusiness, idLegalOwner, registrationDate, qtyDaysAsOwner);
+            ownerRepository.save(owner);
+
+            Owner ownerById = ownerRepository.findById(owner.getId()).orElse(null);
+            if (ownerById != null) {
+                qtyOwnersCreated++;
+                owners.add(ownerById);
+                System.out.println(
+                        "Owner #" + qtyOwnersCreated +
+                                "/" + qty + " created populateDB: " + ownerById);
+            }
+        }
+
+        return owners;
     }
 
-    public List<PropertyContract> populatePlainPropertyContracts(int qty) {
+    /*public List<PropertyContract> populatePlainPropertyContracts(int qty) {
         return null;
-    }
+    }*/
 
-    public List<PropertyContract> assignPropertyContracts(
-            int qty, List<PropertyContract> plainPropertyContracts, List<Owner> owners) {
-        return null;
+    public List<PropertyContract> createAndAssignPropertyContracts(
+            int qty, List<Owner> owners, List<Apartment> apartments) {
+        int qtyContractsCreated = 0;
+        List<PropertyContract> contracts = new ArrayList<>();
+        
+        if (owners == null || owners.isEmpty() || apartments == null || apartments.isEmpty() || qty <= 0) {
+            return null;
+        }
+
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        
+        // Create exactly 10 property contracts
+        int contractsToCreate = Math.min(qty, 10);
+        
+        for (int i = 0; i < contractsToCreate; i++) {
+            // Select a random apartment
+            Apartment selectedApartment = apartments.get(rnd.nextInt(apartments.size()));
+            
+            // Randomly decide number of owners for this apartment (1-3)
+            int numOwners = rnd.nextInt(1, 4); // 1, 2, or 3
+            
+            // Select random owners
+            List<Owner> selectedOwners = new ArrayList<>();
+            List<Owner> availableOwners = new ArrayList<>(owners);
+            
+            for (int j = 0; j < numOwners && !availableOwners.isEmpty(); j++) {
+                int randomIndex = rnd.nextInt(availableOwners.size());
+                Owner selectedOwner = availableOwners.remove(randomIndex);
+                selectedOwners.add(selectedOwner);
+            }
+            
+            // Generate contract details (same for all owners of this apartment)
+            String propertyContractCode = "PROP-" + String.format("%03d", i + 1) + "-" + String.format("%06d", rnd.nextInt(1000000));
+            String urlContractPropertyDocument = "https://docs.example.com/contracts/" + propertyContractCode + ".pdf";
+            LocalDate contractDate = LocalDate.now().minusDays(rnd.nextInt(0, 1095)); // 0 to 3 years ago
+            long valuePropertyContract = rnd.nextLong(50_000, 2_000_001); // 50k to 2M
+            String typeProperty = "APARTMENT";
+            String address = "Address for Apartment " + selectedApartment.getId();
+            boolean isActive = rnd.nextBoolean();
+            
+            // Create a contract for each owner (same contract details, different owner)
+            for (Owner owner : selectedOwners) {
+                PropertyContract contract = new PropertyContract(
+                    propertyContractCode,
+                    urlContractPropertyDocument,
+                    contractDate,
+                    valuePropertyContract,
+                    typeProperty,
+                    address,
+                    isActive
+                );
+                
+                // Set relationships
+                contract.setOwner(owner);
+                contract.setApartment(selectedApartment);
+                
+                // Save to database
+                propertyContractRepository.save(contract);
+                
+                // Verify by fetching from database
+                PropertyContract contractById = propertyContractRepository.findById(contract.getId()).orElse(null);
+                if (contractById != null) {
+                    qtyContractsCreated++;
+                    contracts.add(contractById);
+                    System.out.println(
+                        "PropertyContract #" + qtyContractsCreated +
+                        "/" + contractsToCreate + " created populateDB: " + contractById +
+                        " (Owner: " + owner.getFullName() + ", Apartment: " + selectedApartment.getId() + ")");
+                }
+            }
+        }
+        
+        return contracts;
     }
 }
