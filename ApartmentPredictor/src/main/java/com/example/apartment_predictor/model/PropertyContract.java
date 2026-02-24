@@ -1,11 +1,8 @@
 package com.example.apartment_predictor.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -13,6 +10,7 @@ public class PropertyContract {
 
     @Id
     private String id;
+    private String propertyContractCode;
     private String urlContractPropertyDocument;
     private LocalDate contractDate;
     private long valuePropertyContract;
@@ -20,23 +18,27 @@ public class PropertyContract {
     private String address;
     private boolean isActive;
 
-    //private List<Owner> owners;
-    //private List<Apartment> apartments;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "OWNER_FK")
+    private Owner owner;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "APARTMENT_FK")
+    private Apartment apartment;
 
     public PropertyContract() {
         this.id = UUID.randomUUID().toString();
     }
 
-    public PropertyContract(String urlContractPropertyDocument, LocalDate contractDate, long valuePropertyContract, String typeProperty, String address, boolean isActive) {
+    public PropertyContract(String propertyContractCode,String urlContractPropertyDocument, LocalDate contractDate, long valuePropertyContract, String typeProperty, String address, boolean isActive) {
         this.id = UUID.randomUUID().toString();
+        this.propertyContractCode = propertyContractCode;
         this.urlContractPropertyDocument = urlContractPropertyDocument;
         this.contractDate = contractDate;
         this.valuePropertyContract = valuePropertyContract;
         this.typeProperty = typeProperty;
         this.address = address;
         this.isActive = isActive;
-        //this.owners = new ArrayList<Owner>() ;
-        //this.apartments = new ArrayList<Apartment>();
+
     }
 
     public String getId() {
@@ -45,6 +47,14 @@ public class PropertyContract {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPropertyContractCode() {
+        return propertyContractCode;
+    }
+
+    public void setPropertyContractCode(String propertyContractCode) {
+        this.propertyContractCode = propertyContractCode;
     }
 
     public String getUrlContractPropertyDocument() {
@@ -95,34 +105,35 @@ public class PropertyContract {
         isActive = active;
     }
 
-   /* public List<Owner> getOwners() {
-        return owners;
+    public Owner getOwner() {
+        return owner;
     }
 
-    public void setOwners(List<Owner> owners) {
-        this.owners = owners;
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
-    public List<Apartment> getApartments() {
-        return apartments;
+    public Apartment getApartment() {
+        return apartment;
     }
 
-    public void setApartments(List<Apartment> apartments) {
-        this.apartments = apartments;
-    }*/
+    public void setApartment(Apartment apartment) {
+        this.apartment = apartment;
+    }
 
     @Override
     public String toString() {
         return "PropertyContract{" +
                 "id='" + id + '\'' +
+                ", propertyContractCode='" + propertyContractCode + '\'' +
                 ", urlContractPropertyDocument='" + urlContractPropertyDocument + '\'' +
                 ", contractDate=" + contractDate +
                 ", valuePropertyContract=" + valuePropertyContract +
                 ", typeProperty='" + typeProperty + '\'' +
                 ", address='" + address + '\'' +
                 ", isActive=" + isActive +
-                //", owners=" + owners +
-                //", apartments=" + apartments +
+                ", owners=" + owner.getId() +
+                ", apartments=" + apartment.getId() +
                 '}';
     }
 }
