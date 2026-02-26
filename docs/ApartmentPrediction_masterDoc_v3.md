@@ -61,6 +61,7 @@ $ tree
 .
 ├── ApartmentPredictorApplication.java
 ├── controller
+│   ├── ApartmentAssignRestController.java
 │   ├── ApartmentRestController.java
 │   ├── OwnerRestController.java
 │   ├── PopulateDBController.java
@@ -120,11 +121,11 @@ public class Apartment {
     private Integer parking;
     private String prefarea;
     private String furnishingstatus;
-    // @OneToMany
+    //@OneToMany
     private List reviews;
     //@ManyToMany
     private List schools;
-    //ManyToOne
+    //@ManyToOne
     private List contracts
 }
 
@@ -211,7 +212,7 @@ public class Reviewer {
 > 
 > - validate **Rest Controle**r layer and <mark>data publising with Postman tool.</mark>
 
-![](https://raw.githubusercontent.com/AlbertProfe/ApartmentPredictor/refs/heads/master/docs/diagrams/mc_uml-junittest_v1.png)
+![](https://raw.githubusercontent.com/AlbertProfe/ApartmentPredictor/refs/heads/master/docs/diagrams/mc_v3.png)
 
 ## Postman documentation API REST
 
